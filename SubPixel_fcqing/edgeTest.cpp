@@ -203,18 +203,35 @@ void compute_gradient(double * Gx, double * Gy, double * modG,uchar * image, int
 	if (Gx == NULL || Gy == NULL || modG == NULL || image == NULL)
 		error("compute_gradient: invalid input");
 
+	vector<double> gx, gy, mod, img;
+	for (int i = 0; i < X; i++)
+	{
+		for (int j = 0; j < Y; j++)
+		{
+			img.push_back(image[i + j * X]);
+			gx.push_back(0.0);
+			gy.push_back(0.0);
+			mod.push_back(0.0);
+		}
+	}
+
 	// approximate image gradient using centered differences
 	for (x = 1; x<(X - 1); x++)
 	for (y = 1; y<(Y - 1); y++)
 	{
-		//double gggx = (double)image[(x + 1) + y * X] - (double)image[(x - 1) + y * X];
-		//double gggy = (double)image[x + (y + 1)*X] - (double)image[x + (y - 1)*X];
-		//double mmmmmod = sqrt(Gx[x + y * X] * Gx[x + y * X] + Gy[x + y * X] * Gy[x + y * X]);
-		
+		double gggx = (double)image[(x + 1) + y * X] - (double)image[(x - 1) + y * X];
+		double gggy = (double)image[x + (y + 1)*X] - (double)image[x + (y - 1)*X];
+		double mmmmmod = sqrt(gggx * gggx + gggy * gggy);
+		gx[x + y * X] = gggx;
+		gy[x + y * X] = gggy;
+		mod[x + y * X] = mmmmmod;
+
+
 		Gx[x + y*X] = (double)image[(x + 1) + y*X] - (double)image[(x - 1) + y*X];
 		Gy[x + y*X] = (double)image[x + (y + 1)*X] - (double)image[x + (y - 1)*X];
 		modG[x + y*X] = sqrt(Gx[x + y*X] * Gx[x + y*X] + Gy[x + y*X] * Gy[x + y*X]);
 	}
+	int a = 0;
 }
 
 /* compute sub-pixel edge points using adapted Canny and Devernay methods.
@@ -232,6 +249,17 @@ required to be an edge point. */
 void compute_edge_points(double * Ex, double * Ey, double * modG,
 	double * Gx, double * Gy, int X, int Y)
 {
+	vector<double> ex, ey;
+	for (int i = 0; i < X; i++)
+	{
+		for (int j = 0; j < Y; j++)
+		{
+			ex.push_back(-1);
+			ey.push_back(-1);
+		}
+	}
+
+
 	int x, y, i;
 
 	if (Ex == NULL || Ey == NULL || modG == NULL || Gx == NULL || Gy == NULL)
@@ -283,8 +311,14 @@ void compute_edge_points(double * Ex, double * Ey, double * modG,
 			/* store edge point */
 			Ex[x + y*X] = x + offset * Dx;
 			Ey[x + y*X] = y + offset * Dy;
+
+			ex[x + y * X] = x + offset * Dx;
+			ey[x + y * X] = x + offset * Dx;
+
 		}
 	}
+
+	int a = 0;
 }
 
 /* chain edge points
@@ -411,7 +445,18 @@ void chain_edge_points(int * next, int * prev, double * Ex,	double * Ey,double *
 				next[prev[from]] = -1;  /* only next requires explicit reset  */
 			prev[from] = bck;         /* set prev of bck-from link          */
 		}
+
+
+		
 	}
+
+	vector<int> nex, pre;
+	for (int i = 0; i < X*Y; i++)
+	{
+		nex.push_back(next[i]);
+		pre.push_back(prev[i]);
+	}
+	int a = 0;
 }
 
 /* apply Canny thresholding with hysteresis
@@ -470,6 +515,15 @@ void thresholds_with_hysteresis(int * next, int * prev,
 	for (i = 0; i<X*Y; i++)   /* prev[i]>=0 or next[i]>=0 implies edge point */
 	if ((prev[i] >= 0 || next[i] >= 0) && !valid[i])
 		prev[i] = next[i] = -1;
+
+	vector<int> nex, pre;
+	for (int i = 0; i < X*Y; i++)
+	{
+		nex.push_back(next[i]);
+		pre.push_back(prev[i]);
+	}
+	int a = 0;
+
 
 	/* free memory */
 	free((void *)valid);

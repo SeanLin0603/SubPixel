@@ -17,10 +17,10 @@ int main()
 
 	//parameters setting
 	double * x;          /* x[n] y[n] coordinates of result contour point n */
-	double *	y;
+	double * y;
 	int * curve_limits;  /* limits of the curves in the x[] and y[] */
 	int N, M;         /* result: N contour points, forming M curves */
-	double S = 1.5; /* default sigma=0 */
+	double S = 0; /* default sigma=0 */
 	double H = 4.2; /* default th_h=0  */
 	double L = 0.81; /* default th_l=0  */
 	double W = 1; /* default W=1.3   */
